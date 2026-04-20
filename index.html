@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phillip Ankjaer Pasqualato</title>
+<style>
+:root {
+  --bg: #0a0a0a;
+  --fg: #f0ede8;
+  --fg-70: rgba(240,237,232,.70);
+  --fg-45: rgba(240,237,232,.45);
+  --fg-25: rgba(240,237,232,.25);
+  --fg-12: rgba(240,237,232,.12);
+  --fg-06: rgba(240,237,232,.06);
+  --page-bg: #0a0a0a;
+  --ease: cubic-bezier(0.22,1,0.36,1);
+  --ease-mid: cubic-bezier(0.4,0,0.2,1);
+  --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { -webkit-font-smoothing:antialiased; }
+body { background:var(--page-bg); color:var(--fg); font-family:var(--font); overflow-x:hidden; cursor:none; }
+a,button { cursor:none; font-family:var(--font); }
+@media (hover:none) and (pointer:coarse) {
+  body,a,button { cursor:auto !important; }
+  #cur,#cur-r { display:none !important; }
+}
+
+/* CURSOR */
+#cur { position:fixed; width:8px; height:8px; background:var(--fg); border-radius:50%; pointer-events:none; z-index:999999; transform:translate(-50%,-50%); mix-blend-mode:difference; transition:width .22s var(--ease),height .22s var(--ease); }
+#cur-r { position:fixed; width:34px; height:34px; border:1px solid rgba(240,237,232,.3); border-radius:50%; pointer-events:none; z-index:999998; transform:translate(-50%,-50%); mix-blend-mode:difference; transition:width .28s var(--ease),height .28s var(--ease),border-color .28s; }
+body.hbig #cur { width:18px; height:18px; }
+body.hbig #cur-r { width:58px; height:58px; border-color:rgba(240,237,232,.55); }
+
+/* LOADING */
+#loading { position:fixed; inset:0; background:var(--page-bg); display:flex; align-items:center; justify-content:center; z-index:99999; pointer-events:none; }
+#loading.slide-out { animation:slideOut .46s cubic-bezier(0.76,0,0.24,1) forwards; }
+#loading.slide-in  { animation:slideIn  .38s cubic-bezier(0.76,0,0.24,1) forwards; }
+#loading.hidden { display:none; }
+@keyframes slideOut { from{transform:translateY(0)} to{transform:translateY(-100%)} }
+@keyframes slideIn  { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.prow { display:flex; gap:12px; }
+.lp { border:1.5px solid var(--fg); border-radius:999px; width:66px; height:41px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:300; color:var(--fg); opacity:0; transform:translateY(12px) scale(.88); transition:opacity .4s ease,transform .4s var(--ease); }
+.lp.in { opacity:1; transform:translateY(0) scale(1); }
+.lp.ol { opacity:0; transform:translateX(26px) scale(.45); transition:opacity .25s ease,transform .25s cubic-bezier(.4,0,1,1); }
+.lp.om { opacity:0; transform:scale(.45); transition:opacity .25s ease .03s,transform .25s cubic-bezier(.4,0,1,1) .03s; }
+.lp.or { opacity:0; transform:translateX(-26px) scale(.45); transition:opacity .25s ease .06s,transform .25s cubic-bezier(.4,0,1,1) .06s; }
+
+/* NAV */
+#nav { position:fixed; top:0; left:0; right:0; z-index:600; padding:26px 60px; display:flex; align-items:center; gap:8px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
+#nav.vis { opacity:1; pointer-events:auto; }
+#nav.nav-left { justify-content:flex-start; }
+#nav.nav-right { justify-content:flex-end; }
+.nav-logo { font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--fg-45); text-decoration:none; transition:opacity .3s; }
+.nav-right { display:flex; gap:8px; }
+.nbtn { background:transparent; border:1px solid var(--fg-25); color:var(--fg); border-radius:999px; padding:6px 15px; font-size:12px; text-decoration:none; transition:background .18s,color .18s,border-color .18s; display:inline-flex; align-items:center; }
+.nbtn:hover,.nbtn.act { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+
+/* BACK BUTTON */
+.back-btn { position:fixed; top:26px; left:60px; z-index:600; display:none; align-items:center; gap:7px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-45); background:transparent; border:1px solid var(--fg-25); border-radius:999px; padding:6px 14px 6px 10px; transition:background .18s,color .18s,border-color .18s,opacity .4s; opacity:0; }
+.back-btn svg { flex-shrink:0; transition:transform .2s var(--ease); }
+.back-btn:hover { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+.back-btn:hover svg { transform:translateX(-3px); }
+.back-btn.vis { display:inline-flex; opacity:1; }
+
+/* FOOTER */
+#footer {
+  position:fixed;
+  bottom:0; left:0; right:0;
+  height:48px;
+  background:var(--fg);
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  z-index:100;
+  /* Always visible — no opacity trick that breaks on iOS */
+  opacity:1;
+  transform:translateY(100%);
+  transition:transform .5s var(--ease);
+}
+#footer.vis { transform:translateY(0); }
+.mtrack { display:flex; width:max-content; animation:mq 10s linear infinite; will-change:transform; }
+@keyframes mq { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.mi { display:flex; align-items:center; flex-shrink:0; }
+.mt { font-size:13px; color:#0a0a0a; padding:0 5px; white-space:nowrap; }
+.md { font-size:13px; color:#0a0a0a; margin:0 15px; opacity:.3; }
+
+/* PAGES */
+.page { display:none; min-height:100svh; padding-bottom:64px; }
+.page.active { display:block; }
+
+/* HOME fills viewport exactly — only when active */
+#p-home.active { display:flex; flex-direction:column; min-height:calc(100svh - 48px); padding-bottom:0; }
+#p-home.active #home-inner { flex-shrink:0; }
+#p-home.active > .acc { flex:1 0 auto; }
+#p-home.active > .acc .acc-trig { height:100%; min-height:74px; max-height:120px; }
+#p-home.active > .acc.open { flex:0 0 auto; }
+#p-home.active > .acc.open .acc-trig { height:74px; max-height:74px; }
+#p-home.active > .acc:last-child { padding-bottom:48px; }
+
+/* HERO */
+#home-inner { min-height:55svh; display:flex; flex-direction:column; justify-content:flex-end; padding:0 60px 44px; position:relative; overflow:hidden; }
+
+/* Hero portrait — right column, full height, with gradient */
+#hero-bg {
+  position:absolute;
+  top:0; right:0;
+  width:38%;
+  height:100%;
+  z-index:0;
+  overflow:hidden;
+  opacity:0;
+  transition:opacity 1s ease .2s;
+}
+#hero-bg.loaded { opacity:1; }
+#hero-bg img {
+  width:100%; height:100%;
+  object-fit:cover;
+  object-position:8% center;
+  display:block;
+  transform:scale(1.0);
+}
+/* Gradient: fade left edge only, soft */
+#hero-bg::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: linear-gradient(to right, var(--page-bg) 0%, rgba(10,10,10,.5) 12%, transparent 35%);
+  z-index:1;
+}
+#home-inner > *:not(#hero-bg) { position:relative; z-index:2; }
+
+.h-name { overflow:hidden; }
+.hni { font-size:clamp(34px,5.6vw,78px); font-weight:400; line-height:.93; letter-spacing:-.03em; display:block; transform:translateY(105%); opacity:0; transition:transform .85s var(--ease),opacity .5s ease; }
+.hni.d1 { transition-delay:0ms; }
+.hni.d2 { transition-delay:75ms; }
+.hni.in { transform:translateY(0); opacity:1; }
+.h-bot { margin-top:28px; opacity:0; transform:translateY(16px); transition:opacity .7s ease .52s,transform .7s var(--ease) .52s; }
+.h-bot.in { opacity:1; transform:translateY(0); }
+.h-tag { font-size:clamp(12px,1.1vw,15px); font-style:italic; color:var(--fg-70); line-height:1.6; max-width:440px; }
+.h-meta { display:none; }
+.hline { display:none; }
+
+/* SUBPAGE HERO */
+.sub-hero { padding:120px 60px 64px; position:relative; }
+.sub-name { overflow:hidden; }
+.sni { font-size:clamp(38px,6vw,82px); font-weight:400; line-height:.93; letter-spacing:-.03em; display:block; transform:translateY(40px); opacity:0; transition:transform .85s var(--ease),opacity .6s ease; }
+.sni.d1 { transition-delay:0ms; }
+.sni.d2 { transition-delay:75ms; }
+.sni.in { transform:translateY(0); opacity:1; }
+.sub-bot { margin-top:28px; max-width:560px; opacity:0; transform:translateY(14px); transition:opacity .7s ease .45s,transform .7s var(--ease) .45s; }
+.sub-bot.in { opacity:1; transform:translateY(0); }
+.sub-tag { font-size:clamp(12px,1.1vw,15px); font-style:italic; color:var(--fg-70); line-height:1.6; }
+.sub-line { position:absolute; bottom:0; left:0; right:0; height:1px; background:var(--fg-25); transform-origin:left; transform:scaleX(0); transition:transform .9s var(--ease-mid) .38s; }
+.sub-line.in { transform:scaleX(1); }
+
+/* ACCORDION shared by home and subpages */
+.acc { border-bottom:1px solid var(--fg-12); opacity:0; transform:translateY(20px); transition:opacity .55s ease,transform .55s var(--ease); }
+.acc.in { opacity:1; transform:translateY(0); }
+.acc-trig { display:flex; justify-content:space-between; align-items:center; padding:0 60px; height:74px; transition:opacity .2s; user-select:none; }
+.acc-trig:hover { opacity:.5; }
+.acc-title { font-size:clamp(28px,4vw,54px); font-weight:400; letter-spacing:-.025em; line-height:1; }
+.acc-icon { width:36px; height:36px; border:1px solid var(--fg-25); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:transform .38s var(--ease-mid),border-color .2s; }
+.acc-trig:hover .acc-icon { border-color:var(--fg-45); }
+.acc.open .acc-icon { transform:rotate(45deg); }
+.acc-body { display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease-mid); }
+.acc.open .acc-body { grid-template-rows:1fr; }
+.acc-inner { overflow:hidden; }
+.acc.open .acc-inner { overflow:visible; }
+.acc-pad { padding:4px 60px 48px; opacity:0; transform:translateY(8px); transition:opacity .32s ease .05s,transform .32s var(--ease) .05s; }
+.acc.open .acc-pad { opacity:1; transform:translateY(0); }
+.acc-intro { font-size:14px; color:var(--fg-45); line-height:1.65; max-width:580px; margin-bottom:24px; }
+
+/* PILLS fixed tooltip via JS (not CSS hover) */
+.pw { display:flex; flex-wrap:wrap; gap:9px; }
+.pc { position:relative; display:inline-flex; align-items:center; gap:5px; border:1px solid var(--fg-25); border-radius:999px; padding:7px 16px; font-size:13px; color:var(--fg); background:transparent; transition:background .2s,color .2s,border-color .2s; white-space:nowrap; }
+.pc:hover { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+.dot { font-size:7px; opacity:.4; flex-shrink:0; }
+.arr { font-size:10px; opacity:.65; }
+
+/* TOOLTIP positioned by JS, fixed in viewport */
+#tooltip {
+  position:fixed;
+  width:256px;
+  background:var(--tt-bg, #161616);
+  border:1px solid rgba(240,237,232,.12);
+  color:var(--fg);
+  border-radius:12px;
+  padding:13px 16px;
+  font-size:12.5px;
+  line-height:1.65;
+  z-index:8000;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .18s,transform .18s var(--ease);
+  box-shadow:0 16px 48px rgba(0,0,0,.7);
+}
+#tooltip.vis { opacity:1; transform:translateY(0); }
+#tooltip h4 { font-weight:600; font-size:13px; margin-bottom:5px; color:var(--fg); }
+#tooltip p { color:var(--fg-70); }
+#tt-arr { position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid var(--tt-bg, #161616); }
+
+/* PAGE-SPECIFIC ACCENT COLORS */
+#p-climate { --accent: rgba(60,180,100,.12); --tt-bg: #1a3d26; }
+#p-health  { --accent: rgba(200,80,40,.12);  --tt-bg: #3d1508; }
+#p-venture { --accent: rgba(60,100,200,.12); --tt-bg: #0f1e3a; }
+
+/* Subpage cards tinted with page accent */
+#p-climate .pcard,#p-health .pcard,#p-venture .pcard {
+  background: rgba(240,237,232,.05);
+}
+#p-climate .pcard:hover { background:rgba(60,180,100,.1); border-color:rgba(60,180,100,.25); }
+#p-health  .pcard:hover { background:rgba(200,80,40,.1);  border-color:rgba(200,80,40,.25); }
+#p-venture .pcard:hover { background:rgba(60,100,200,.1); border-color:rgba(60,100,200,.25); }
+
+/* Subpage accordion border tinted */
+#p-climate .acc { border-bottom-color:rgba(60,180,100,.18); }
+#p-health  .acc { border-bottom-color:rgba(200,80,40,.2); }
+#p-venture .acc { border-bottom-color:rgba(60,100,200,.18); }
+
+/* Subpage pills tinted */
+#p-climate .pc { border-color:rgba(60,180,100,.3); }
+#p-health  .pc { border-color:rgba(200,80,40,.3); }
+#p-venture .pc { border-color:rgba(60,100,200,.3); }
+#p-climate .pc:hover,#p-health .pc:hover,#p-venture .pc:hover { background:var(--fg); color:var(--page-bg); border-color:var(--fg); }
+
+/* ABOUT GRID */
+.about-grid { display:grid; grid-template-columns:260px 1fr; gap:44px; align-items:start; }
+.about-img { border-radius:12px; overflow:hidden; aspect-ratio:4/5; background:var(--fg-06); display:flex; align-items:center; justify-content:center; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-25); }
+.about-img img { width:100%; height:100%; object-fit:cover; object-position:center 15%; display:block; }
+.tb { font-size:15px; color:var(--fg-70); line-height:1.72; max-width:620px; }
+.tb p + p { margin-top:10px; }
+
+/* PROJECT CARDS */
+.pcard { border:1px solid var(--fg-12); border-radius:12px; padding:20px 24px; margin-bottom:14px; background:var(--fg-06); transition:background .25s,border-color .25s; }
+.pcard:hover { background:rgba(240,237,232,.08); border-color:var(--fg-25); }
+.pc-inner { display:grid; grid-template-columns:240px 1fr; gap:20px; align-items:start; }
+.pc-img { border-radius:8px; overflow:hidden; background:var(--fg-06); position:relative; aspect-ratio:4/3; flex-shrink:0; }
+.pc-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .55s var(--ease); }
+.pcard:hover .pc-img img { transform:scale(1.04); }
+.pc-img-ph { display:none; }
+.pc-img:not(:has(img)) { display:none; }
+.pc-body { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.pc-head { display:flex; flex-direction:column; gap:3px; }
+.pc-name { font-size:16px; font-weight:500; letter-spacing:-.01em; }
+.pc-period { font-size:11px; color:var(--fg-45); letter-spacing:.02em; }
+.pc-sub { font-size:13px; color:var(--fg-70); line-height:1.5; }
+.pc-desc { font-size:12.5px; color:var(--fg-45); line-height:1.68; }
+.pc-lnk { font-size:12.5px; color:var(--fg-70); text-decoration:none; display:inline-flex; align-items:center; gap:4px; border-bottom:1px solid var(--fg-25); padding-bottom:1px; transition:color .18s,border-color .18s; width:fit-content; }
+.pc-lnk:hover { color:var(--fg); border-color:var(--fg-70); }
+.pc-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.pc-tag { border:1px solid var(--fg-12); border-radius:999px; padding:4px 11px; font-size:11px; color:var(--fg-45); }
+@media(max-width:600px){ .pc-inner { grid-template-columns:1fr; } }
+
+/* WORK AREAS */
+.wa-list { display:flex; flex-direction:column; }
+.wa-item { padding:10px 0; border-top:1px solid var(--fg-12); font-size:14px; color:var(--fg-45); }
+
+/* PERSPECTIVE */
+.persp { padding-left:22px; border-left:1px solid var(--fg-25); margin-bottom:28px; }
+.persp-lbl { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg-25); margin-bottom:11px; }
+.persp-txt { font-size:14px; font-style:italic; color:var(--fg-70); line-height:1.75; max-width:580px; }
+
+/* CONTACT CARDS */
+.contact-section { padding:52px 60px 80px; }
+.contact-cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:680px; }
+.contact-card {
+  border:1px solid var(--fg-12);
+  border-radius:16px;
+  padding:28px 28px 24px;
+  background:var(--fg-06);
+  text-decoration:none;
+  color:var(--fg);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  transition:background .22s,border-color .22s,transform .22s var(--ease);
+  position:relative;
+  overflow:hidden;
+}
+.contact-card:hover {
+  background:rgba(240,237,232,.1);
+  border-color:var(--fg-25);
+  transform:translateY(-2px);
+}
+.contact-card-icon {
+  width:40px; height:40px;
+  border:1px solid var(--fg-25);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.contact-card-label {
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--fg-45);
+}
+.contact-card-value {
+  font-size:15px;
+  font-weight:400;
+  color:var(--fg);
+  line-height:1.3;
+}
+.contact-card-action {
+  font-size:12px;
+  color:var(--fg-45);
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-top:auto;
+}
+@media(max-width:520px){ .contact-cards { grid-template-columns:1fr; } }
+
+/* REVEAL */
+.rev { opacity:0; transform:translateY(24px); transition:opacity .65s ease,transform .65s var(--ease); }
+.rev.in { opacity:1; transform:translateY(0); }
+.rev.d1 { transition-delay:.09s; }
+.rev.d2 { transition-delay:.18s; }
+
+/* CV PDF VIEWER */
+#cv-ov { display:none; position:fixed; inset:0; background:rgba(8,8,8,.92); backdrop-filter:blur(16px); z-index:10000; align-items:center; justify-content:center; opacity:0; transition:opacity .32s; }
+#cv-ov.open { display:flex; }
+#cv-ov.visible { opacity:1; }
+#cv-frame-wrap {
+  position:relative;
+  width:min(860px, 94vw);
+  height:min(92svh, 1100px);
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  transform:translateY(24px) scale(.97);
+  transition:transform .36s var(--ease);
+}
+#cv-ov.visible #cv-frame-wrap { transform:translateY(0) scale(1); }
+#cv-toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 18px;
+  background:rgba(240,237,232,.06);
+  border:1px solid rgba(240,237,232,.12);
+  border-bottom:none;
+  border-radius:14px 14px 0 0;
+  backdrop-filter:blur(8px);
+}
+#cv-toolbar-title { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--fg-45); }
+#cv-toolbar-actions { display:flex; gap:8px; }
+#cv-toolbar-actions a,#cv-toolbar-actions button {
+  border:1px solid var(--fg-25); border-radius:999px; padding:5px 14px;
+  font-size:12px; color:var(--fg); background:transparent; font-family:var(--font);
+  text-decoration:none; transition:background .18s,color .18s,border-color .18s;
+  display:inline-flex; align-items:center; gap:6px;
+}
+#cv-toolbar-actions a:hover,#cv-toolbar-actions button:hover { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+#cv-iframe {
+  width:100%;
+  flex:1;
+  border:1px solid rgba(240,237,232,.12);
+  border-radius:0 0 14px 14px;
+  background:#fff;
+}
+
+/* RESPONSIVE — tablet */
+@media (max-width:1023px) {
+  #nav { padding:20px 32px; }
+  .back-btn { left:32px; top:20px; }
+  #home-inner,.sub-hero { padding-left:32px; padding-right:32px; }
+  #home-inner { padding-bottom:56px; }
+  .sub-hero { padding-top:100px; padding-bottom:44px; }
+  .acc-trig { padding:0 32px; height:80px; }
+  .acc-pad { padding:4px 32px 40px; }
+  #hero-bg { width:42%; }
+}
+
+/* RESPONSIVE — mobile */
+@media (max-width:639px) {
+  /* Cursor */
+  #cur, #cur-r { display:none; }
+  body, a, button { cursor:auto; }
+
+  /* Footer — even shorter */
+  #footer { height:22px; }
+  .mt,.md { font-size:9px; }
+  .page { padding-bottom:32px; }
+  .mtrack { animation-duration:16s; }
+
+  /* Nav */
+  #nav { padding:14px 20px; gap:6px; }
+  .nbtn { padding:5px 12px; font-size:11px; }
+  .back-btn { left:20px; top:14px; padding:5px 12px 5px 8px; font-size:10px; }
+
+  /* HOME HERO — portrait floated right, text left */
+  #home-inner {
+    padding:68px 20px 28px;
+    min-height:auto;
+    position:relative;
+    overflow:hidden;
+  }
+  #hero-bg {
+    display:block !important;
+    position:absolute !important;
+    top:56px !important;
+    right:0 !important;
+    left:auto !important;
+    width:44vw !important;
+    height:56vw !important;
+    max-width:165px;
+    max-height:210px;
+    border-radius:10px 0 0 10px !important;
+    overflow:hidden;
+    opacity:1 !important;
+    z-index:0;
+  }
+  #hero-bg img {
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position:35% top;
+  }
+  #hero-bg::before {
+    display:block !important;
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(to right, var(--page-bg) 0%, rgba(10,10,10,.4) 30%, transparent 60%);
+    z-index:1;
+  }
+  #home-inner > *:not(#hero-bg) { position:relative; z-index:2; }
+  .h-name { overflow:hidden; }
+  .hni { font-size:clamp(28px,7.5vw,40px); }
+  .h-name:first-of-type .hni { padding-right:40vw; }
+  .h-bot { margin-top:12px; }
+  .h-tag { font-size:12px; max-width:56%; }
+  .h-meta { display:none; }
+
+  /* Subpage hero */
+  .sub-hero { padding:66px 20px 26px; }
+  .sni { font-size:clamp(28px,7.5vw,44px); }
+  .sub-bot { margin-top:12px; }
+  .sub-tag { font-size:12px; }
+
+  /* Accordions */
+  .acc-trig { padding:0 20px; height:56px; }
+  .acc-title { font-size:clamp(20px,6vw,30px); }
+  .acc-pad { padding:4px 20px 26px; }
+  .acc-intro { font-size:12.5px; }
+
+  /* About */
+  .about-grid { grid-template-columns:1fr; gap:16px; }
+  .about-img { aspect-ratio:3/2; }
+  .tb { font-size:13.5px; }
+
+  /* Pills */
+  .pc { font-size:11px; padding:5px 10px; }
+  .pw { gap:6px; }
+
+  /* Project cards */
+  .pc-inner { grid-template-columns:1fr; gap:10px; }
+  .pc-img { aspect-ratio:16/9 !important; }
+  .pcard { padding:12px 14px; margin-bottom:8px; }
+  .pc-name { font-size:13px; }
+  .pc-sub { font-size:12px; }
+  .pc-desc { font-size:11px; line-height:1.6; }
+  .pc-tag { font-size:10px; padding:3px 8px; }
+
+  /* Contact */
+  .contact-cards { grid-template-columns:1fr; gap:10px; }
+  .contact-card { padding:18px 16px 14px; gap:12px; }
+  .contact-card-value { font-size:13px; word-break:break-all; }
+  .contact-section { padding:24px 20px 60px; }
+
+  /* CV viewer fullscreen */
+  #cv-frame-wrap { width:100vw; height:100svh; border-radius:0; }
+  #cv-toolbar { border-radius:0; padding:12px 16px; }
+  #cv-iframe { border-radius:0; border:none; }
+  #cv-toolbar-title { display:none; }
+
+  /* Home active */
+  #p-home.active { min-height:calc(100svh - 34px); }
+  #p-home.active > .acc .acc-trig { min-height:56px; }
+  #p-home.active > .acc:last-child { padding-bottom:34px; }
+
+  /* Perspectives / work */
+  .persp-txt { font-size:12.5px; }
+  .wa-item { font-size:12.5px; }
+}
+</style>
+</head>
+<body>
+
+<!-- GLOBAL TOOLTIP (positioned by JS) -->
+<div id="tooltip"><h4 id="tt-title"></h4><p id="tt-body"></p><div id="tt-arr"></div></div>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<div id="loading">
+  <div class="prow">
+    <div class="lp" id="lp0">P</div>
+    <div class="lp" id="lp1">A</div>
+    <div class="lp" id="lp2">P</div>
+  </div>
+</div>
+
+<nav id="nav">
+  <a class="nbtn" href="#" id="cv-btn">CV</a>
+  <a class="nbtn" id="contact-btn" href="#" onclick="navigate('contact');return false;">Contact</a>
+</nav>
+
+<button class="back-btn" id="back-btn" onclick="navigate('home')">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <line x1="12" y1="7" x2="2" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <polyline points="6,3 2,7 6,11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Back
+</button>
+
+<div id="footer"><div class="mtrack" id="mtrack"></div></div>
+
+<div id="cv-ov">
+  <div id="cv-frame-wrap">
+    <div id="cv-toolbar">
+      <span id="cv-toolbar-title">Phillip Ankjaer Pasqualato &nbsp;/&nbsp; CV</span>
+      <div id="cv-toolbar-actions">
+        <a href="cv2026.pdf" download="Phillip_Ankjaer_Pasqualato_CV.pdf">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5M1 11h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download
+        </a>
+        <button onclick="closeCV()">Close</button>
+      </div>
+    </div>
+    <iframe id="cv-iframe" src="" title="CV"></iframe>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     HOME
+═══════════════════════════════════════════ -->
+<div class="page active" id="p-home">
+  <div id="home-inner">
+    <!--
+      HERO BACKGROUND IMAGE
+      Replace the src below with your Cloudinary URL.
+      Works best with a portrait or landscape photo of yourself or a relevant scene.
+      If no image is added, the section looks clean without it.
+    -->
+    <div id="hero-bg">
+      <img id="hero-bg-img" src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591453/foto_profil_udvidet_opfd6n.png" alt="" onload="document.getElementById('hero-bg').classList.add('loaded')">
+    </div>
+
+    <div class="h-name"><span class="hni d1">Phillip Ankjaer</span></div>
+    <div class="h-name"><span class="hni d2">Pasqualato</span></div>
+    <div class="h-bot">
+      <p class="h-tag">Discovering through curiosity and building through responsibility to create the things that actually matter.</p>
+    </div>
+    <div class="h-meta" id="h-meta">24 &nbsp;/&nbsp; Copenhagen<br>Phillippasqualato@hotmail.com</div>
+    <div class="hline" id="hline"></div>
+  </div>
+
+  <div class="acc" id="a-areas">
+    <div class="acc-trig" onclick="togAcc('a-areas')">
+      <span class="acc-title">Areas</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <p class="acc-intro">Three areas that I keep coming back to. Not because they are the only interesting problems, but because they sit at the intersection of systems, people and real-world change. Each one connects to something I have worked on or lived through.</p>
+      <div class="pw">
+        <button class="pc" onclick="navigate('climate')">Climate &amp; Energy <span class="arr">↗</span></button>
+        <button class="pc" onclick="navigate('health')">Health Tech <span class="arr">↗</span></button>
+        <button class="pc" onclick="navigate('venture')">Venture &amp; Entrepreneurship <span class="arr">↗</span></button>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="a-work">
+    <div class="acc-trig" onclick="togAcc('a-work')">
+      <span class="acc-title">Work</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="pw">
+        <button class="pc has-tt" data-tt-title="Product design" data-tt-body="Designing products that work in the real world, built around how people actually behave. Combining research, iteration and practical thinking to create things that hold up when they meet reality.">Product design <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Co-design" data-tt-body="Bringing users and stakeholders into the process early. Not as validators of ideas already made, but as genuine contributors to what gets built.">Co-design <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Participatory design" data-tt-body="Designing with people, not just for them. Especially relevant in healthcare, where the people closest to the problem often hold the most important insight.">Participatory design <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="System thinking" data-tt-body="Understanding how parts connect and why systems behave the way they do under pressure. Most problems are not isolated. They are symptoms of something bigger.">System thinking <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Healthcare" data-tt-body="Working on solutions within healthcare from both a patient perspective and a systems perspective. Driven by direct experience with how healthcare systems work under pressure.">Healthcare <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Renewable energy" data-tt-body="From renewable energy products and user adoption to understanding how energy systems actually work in practice. Where technology meets real life, not on a slide, but in someone's home.">Renewable energy <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Grid balancing" data-tt-body="Exploring how decentral capacity and demand flexibility can play a role in stabilising energy grids. A technical challenge with enormous behavioural dimensions.">Grid balancing <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Start-ups" data-tt-body="Part of the founding team at EasyGreen through Medley VC. Sales, product, process, partnerships. Real responsibility from day one, contributing to roughly 22% of total revenue leading up to acquisition.">Start-ups <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Accelerating" data-tt-body="Working within structured programmes to develop ventures faster. From Deep Green Innovators to Accelerace and the VC Explorer Programme.">Accelerating <span class="dot">●</span></button>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="a-about">
+    <div class="acc-trig" onclick="togAcc('a-about')">
+      <span class="acc-title">About</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="about-grid">
+        <div>
+          <div class="about-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591322/Profil-foto-kopi_cqyhbt.png" alt="Phillip Ankjaer Pasqualato"></div>
+        </div>
+        <div>
+          <div class="tb" style="margin-bottom:26px;">
+            <p style="font-size:17px;font-weight:500;color:var(--fg);letter-spacing:-.01em;margin-bottom:16px;font-style:normal;">Driven by curiosity, grounded in real world impact.</p>
+            <p>I am someone who is naturally drawn to understanding how things actually work. Not just how they are designed or intended to work, but what happens when they meet reality. Systems, people, habits, constraints.</p>
+            <p>I enjoy creating and developing, especially when there is something meaningful at stake. I am motivated by turning ideas into something tangible, and by working on things that have real value for the people they are meant for.</p>
+            <p>I tend to look at the bigger picture while staying close to the details. Understanding how things connect, where friction arises, and what it takes to make something work in practice.</p>
+            <p>At my core, I am driven by making things move forward. Taking something from thought to action, and contributing to solutions that make sense in the real world.</p>
+          </div>
+          <div class="pw">
+            <span class="pc">Copenhagen based</span>
+            <span class="pc">Builder</span>
+            <span class="pc">Curious by nature</span>
+          </div>
+        </div>
+      </div>
+    </div></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     CLIMATE & ENERGY  bg: #0c1a12
+═══════════════════════════════════════════ -->
+<div class="page" id="p-climate">
+  <div class="sub-hero">
+    <div class="sub-name"><span class="sni d1">Climate &amp;</span></div>
+    <div class="sub-name"><span class="sni d2">Energy</span></div>
+    <div class="sub-bot">
+      <p class="sub-tag">Exploring how energy systems, technology, and human behavior intersect to create solutions that hold up in the real world.</p>
+    </div>
+    <div class="sub-line" id="cl-line"></div>
+  </div>
+
+  <div class="acc" id="cl-achievements">
+    <div class="acc-trig" onclick="togAcc('cl-achievements')">
+      <span class="acc-title">Achievements</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="pcard">
+        <div class="pc-inner">
+          <div class="pc-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591305/EG_founded_early_mavahr.jpg" alt="EasyGreen founding team"></div>
+          <div class="pc-body">
+            <div class="pc-head"><div class="pc-name">EasyGreen</div><div class="pc-period">2022 present &nbsp;/&nbsp; Acquired by Modstrom</div></div>
+            <div class="pc-sub">Making renewable energy simple and accessible for everyone.</div>
+            <div class="pc-desc">EasyGreen was founded to remove the practical and structural barriers that prevent people from switching to renewable energy. As part of the founding team, I worked across several parts of the business, from early product development and go-to-market efforts to sales, partnerships and shaping the digital platform. Being involved at such an early stage meant helping build the company itself: defining processes, testing ideas in the market and continuously improving how we delivered value to customers. After the first phase of growth, EasyGreen was acquired by Modstrom, where the work continues to scale the solutions and reach more households.</div>
+            <a class="pc-lnk" href="https://easygreen.dk" target="_blank" rel="noreferrer">Visit EasyGreen ↗</a>
+            <div class="pc-tags"><span class="pc-tag">Startup</span><span class="pc-tag">Founding team</span><span class="pc-tag">Product</span><span class="pc-tag">VC-backed</span><span class="pc-tag">Accelerating</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="pc-inner">
+          <div class="pc-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591423/Deep-Green-Innovators-web-cover_lvglyj.png" alt="Deep Green Innovators"></div>
+          <div class="pc-body">
+            <div class="pc-head"><div class="pc-name">Deep Green Innovators</div><div class="pc-period">2025</div></div>
+            <div class="pc-sub">Unleashing Sustainable Energy</div>
+            <div class="pc-desc">Deep Green Innovators is a venture and innovation program focused on developing new solutions for the green transition. The program brings together researchers, students and entrepreneurs from several Danish universities. As part of Cohort 2 | Unleashing Sustainable Energy | I worked with other participants to explore opportunities within sustainable energy and climate innovation through workshops, collaboration and venture exploration.</div>
+            <a class="pc-lnk" href="https://www.deepgreeninnovation.com/" target="_blank" rel="noreferrer">Visit Deep Green Innovators ↗</a>
+            <div class="pc-tags"><span class="pc-tag">Climate Innovation</span><span class="pc-tag">Venture Program</span><span class="pc-tag">Sustainable Energy</span><span class="pc-tag">Startup Exploration</span></div>
+          </div>
+        </div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="cl-work">
+    <div class="acc-trig" onclick="togAcc('cl-work')">
+      <span class="acc-title">Work</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <p class="acc-intro" style="margin-bottom:28px;">Over the past years I've spent a lot of time working within different parts of the energy transition. From renewable energy products and optimisation tools to understanding how energy systems actually work in practice.<br><br>A big part of my interest is where technology meets real life. It's one thing to build good solutions, it's another to make sure they work in the systems they are part of and that people actually use them.<br><br>The areas below are the topics and problems within energy that I've mainly been working with and exploring.</p>
+      <div class="wa-list">
+        <div class="wa-item">Renewable energy products and user adoption</div>
+        <div class="wa-item">AI-driven energy optimisation</div>
+        <div class="wa-item">Grid balancing and decentral capacity</div>
+        <div class="wa-item">Scaling energy startups</div>
+        <div class="wa-item">Sustainable Design, BSc</div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="cl-perspectives">
+    <div class="acc-trig" onclick="togAcc('cl-perspectives')">
+      <span class="acc-title">Perspectives</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="persp" style="margin-bottom:28px;">
+        <div class="persp-lbl">Perspective</div>
+        <p class="persp-txt">What I find most interesting about the energy transition is how many different pieces have to work together for it to succeed. Technology alone is rarely enough. Incentives, regulation, infrastructure and user behaviour all shape whether a solution actually works in practice. Many of the most interesting challenges sit exactly there, in the space between markets, systems and everyday decisions people make in their homes.</p>
+      </div>
+      <div class="pw">
+        <button class="pc has-tt" data-tt-title="Systems thinking" data-tt-body="Energy markets, grids and user behaviour are deeply interconnected. Change in one area creates ripple effects throughout the whole system.">Systems thinking <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Human behaviour" data-tt-body="People's habits, incentives and daily decisions are just as important as the technology. A great product that people won't use doesn't solve anything.">Human behaviour <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Incentives matter" data-tt-body="Whether it's policy, pricing or product design, getting incentives right is often the difference between adoption and failure.">Incentives matter <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Real-world adoption" data-tt-body="A solution only creates value if it's actually used. Understanding why people adopt or reject new energy products is one of the most underrated challenges in the transition.">Real-world adoption <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Complexity and coordination" data-tt-body="The green transition requires coordination between governments, utilities, startups and end users simultaneously. That coordination challenge is underestimated.">Complexity and coordination <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Practical solutions" data-tt-body="Solutions that work in real homes, real grids and real markets. Not just on slides or in pilot programmes.">Practical solutions <span class="dot">●</span></button>
+      </div>
+    </div></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     HEALTH TECH  bg: #0c1320
+═══════════════════════════════════════════ -->
+<div class="page" id="p-health">
+  <div class="sub-hero">
+    <div class="sub-name"><span class="sni d1">Health</span></div>
+    <div class="sub-name"><span class="sni d2">Tech</span></div>
+    <div class="sub-bot">
+      <p class="sub-tag">Exploring how technology, design and systems thinking can create real, measurable improvements in healthcare, built on both personal experience and hands-on work.</p>
+    </div>
+    <div class="sub-line" id="ht-line"></div>
+  </div>
+
+  <div class="acc" id="ht-achievements">
+    <div class="acc-trig" onclick="togAcc('ht-achievements')">
+      <span class="acc-title">Achievements</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="pcard">
+        <div class="pc-inner">
+          <div class="pc-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591416/Pr%C3%A6sentation_eksamen_3._semester_fjvwqn.png" alt="IV Solution project"></div>
+          <div class="pc-body">
+            <div class="pc-head"><div class="pc-name">IV Solution</div><div class="pc-period">2025 ongoing &nbsp;/&nbsp; Rigshospitalet x Copenhagen Health Innovation</div></div>
+            <div class="pc-sub">Redesigning mobility for patients on IV drops</div>
+            <div class="pc-desc">As part of the 3rd semester in Sustainable Design at Aalborg University, my project and I collaborated with Rigshospitalet and Copenhagen Health Innovation (CHI) to develop a more flexible and user-friendly solution for patients connected to IV drip stands and infusion pumps. The goal was to increase patient mobility during hospital stays, an area I care deeply about through my broader personal experience within the healthcare system, and one that has a direct impact on recovery and quality of life. The project culminated in a pitch event, where we received feedback and perspectives from clinicians and hospital staff, including the team at Ward 5054.</div>
+            <div class="pc-tags"><span class="pc-tag">Product design</span><span class="pc-tag">Co-design</span><span class="pc-tag">Participatory design</span><span class="pc-tag">Healthcare</span></div>
+          </div>
+        </div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="ht-work">
+    <div class="acc-trig" onclick="togAcc('ht-work')">
+      <span class="acc-title">Work</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <p class="acc-intro" style="margin-bottom:28px;">My interest in health technology is deeply personal. Growing up, hospitals were never far away. Allergies, asthma and severe reactions meant that healthcare systems were not something abstract to me, they were something I experienced from the inside. At one point, a hospital error led to me being given something I'm severely allergic to. I went into anaphylactic shock and ended up on a respirator. That experience fundamentally changed how I think about healthcare systems and responsibility. Afterwards, one thought kept coming back to me: "How the hell do I make sure this doesn't happen to someone else?" That question stayed with me. It made me realise how much the design of systems, processes and communication matters in environments where people depend on them working properly. Since then I've been interested in understanding healthcare both from the patient side and from a systems perspective.</p>
+      <div class="wa-list">
+        <div class="wa-item">IV drip mobility solution and patient-centred design</div>
+        <div class="wa-item">LCA on Cytoset and Life Cycle Assessment</div>
+        <div class="wa-item">Patient safeness and anaphylaxis and system errors</div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="ht-perspectives">
+    <div class="acc-trig" onclick="togAcc('ht-perspectives')">
+      <span class="acc-title">Perspectives</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="persp" style="margin-bottom:28px;">
+        <div class="persp-lbl">Perspective</div>
+        <p class="persp-txt">Healthcare is a field filled with incredibly skilled and dedicated professionals. At the same time, when you look at the system from the outside, you realise how much everyday work is shaped by routines, habits and complex workflows. This makes innovation both important and difficult. New technologies and solutions often fail not because they are technically poor, but because they are difficult to integrate into the everyday reality of healthcare professionals. For me, the most interesting questions sit exactly there, in understanding how systems, people and practices interact, and how new solutions can actually be adopted in environments where reliability and trust are essential.</p>
+      </div>
+      <div class="pw">
+        <button class="pc has-tt" data-tt-title="System understanding" data-tt-body="Healthcare is a deeply complex system. Understanding how processes, people and workflows interact is a prerequisite for designing solutions that actually hold up.">System understanding <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Human-centered healthcare" data-tt-body="Healthcare innovation needs to start from the lived experience of both patients and professionals. Design that ignores either side will fail.">Human-centered healthcare <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Co-design" data-tt-body="Involving clinicians, patients and administrators in the design process leads to solutions that can actually be integrated into everyday hospital workflows.">Co-design <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Participatory design" data-tt-body="Designing with people, not just for them. Especially in healthcare, where the people closest to the problem often hold the most important insight.">Participatory design <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Adoption and implementation" data-tt-body="New technologies in healthcare often fail not because they are technically poor, but because they are difficult to integrate into the everyday reality of healthcare professionals. Reliability and trust are everything.">Adoption &amp; implementation <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Patient perspective" data-tt-body="Having experienced the healthcare system as a patient shapes how I think about design. The patient experience is often invisible to those building and running the system.">Patient perspective <span class="dot">●</span></button>
+      </div>
+    </div></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     VENTURE  bg: #180f0a
+═══════════════════════════════════════════ -->
+<div class="page" id="p-venture">
+  <div class="sub-hero">
+    <div class="sub-name"><span class="sni d1">Venture &amp;</span></div>
+    <div class="sub-name"><span class="sni d2">Entrepreneurship</span></div>
+    <div class="sub-bot">
+      <p class="sub-tag">Exploring what it takes to build something from scratch: the people, the problems, and the relentless push to turn ideas into things that actually work in the real world.</p>
+    </div>
+    <div class="sub-line" id="ve-line"></div>
+  </div>
+
+  <div class="acc" id="ve-achievements">
+    <div class="acc-trig" onclick="togAcc('ve-achievements')">
+      <span class="acc-title">Achievements</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="pcard">
+        <div class="pc-inner">
+          <div class="pc-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591305/EG_founded_early_mavahr.jpg" alt="EasyGreen Medley team"></div>
+          <div class="pc-body">
+            <div class="pc-head"><div class="pc-name">EasyGreen via Medley VC</div><div class="pc-period">2022 present</div></div>
+            <div class="pc-sub">A Medley.VC journey</div>
+            <div class="pc-desc">EasyGreen was born out of Medley, a Danish venture capital, whose model is to build and scale companies from within. Being trusted as one of the first people in meant carrying real responsibility, from day one. I worked across business development, sales, recruitment, platform design, and internal processes, and played a role in generating roughly 22% of total revenue leading up to the acquisition by Modstrom in 2023. Working this closely with a VC-backed venture gave me a front-row seat to how startups are built, structured, and eventually scaled. Medley's approach: building companies with deliberate intention, strong founders, and a clear thesis, shaped how I think about what it takes to go from zero to something real.</div>
+            <a class="pc-lnk" href="https://www.medleycapital.dk/" target="_blank" rel="noreferrer">Visit Medley Capital ↗</a>
+            <div class="pc-tags"><span class="pc-tag">Startup</span><span class="pc-tag">Founding Team Member</span><span class="pc-tag">Product</span><span class="pc-tag">VC-backed</span><span class="pc-tag">Accelerating</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="pc-inner">
+          <div class="pc-img"><img src="https://res.cloudinary.com/dygeeiaul/image/upload/v1776591465/Billede_f%C3%A6lles_odscnt.jpg" alt="Accelerace VC Explorer Programme"></div>
+          <div class="pc-body">
+            <div class="pc-head"><div class="pc-name">Accelerace and BII</div><div class="pc-period">2026 &nbsp;/&nbsp; VC Explorer Programme</div></div>
+            <div class="pc-sub">VC Explorer Programme</div>
+            <div class="pc-desc">Over two weekends in Aarhus, I took part in the VC Explorer Programme, gaining insight into how venture capital works in practice. Through discussions, cases, and exercises, we explored how startups are sourced, how investments are evaluated, and how decisions are made under uncertainty. From understanding deal flow and risk assessment to thinking through investment cases and VC founder dynamics, the programme provided a structured look into how ventures are identified and developed. What stood out most was the shift in perspective, from building solutions to evaluating them. It gave a clearer understanding of how ideas are assessed, what signals matter, and how investors think about potential, risk, and scale.</div>
+            <a class="pc-lnk" href="https://accelerace.io/" target="_blank" rel="noreferrer">Visit Accelerace and BII ↗</a>
+            <div class="pc-tags"><span class="pc-tag">Deal Flow</span><span class="pc-tag">Sourcing founders</span><span class="pc-tag">Venture risk</span><span class="pc-tag">Startup evaluation</span><span class="pc-tag">Investment process</span><span class="pc-tag">Exits</span><span class="pc-tag">Founder relations</span><span class="pc-tag">First meetings</span></div>
+          </div>
+        </div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="ve-work">
+    <div class="acc-trig" onclick="togAcc('ve-work')">
+      <span class="acc-title">Work</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <p class="acc-intro" style="margin-bottom:28px;">Over the past years I've been involved in the early stages of building a company. From being part of the founding team to contributing across business development, product, and operations.<br><br>What I've come to appreciate is how much progress depends on both direction and execution. It's one thing to think strategically about where something should go, it's another to put in the work required to actually move it forward.<br><br>A big part of my interest lies in what it takes to turn an idea into something real. Not just a strong concept, but something that works in practice, grows, and finds its place in the market.<br><br>The areas below are the topics and processes within venture and entrepreneurship that I've mainly been working with and exploring.</p>
+      <div class="wa-list">
+        <div class="wa-item">Early-stage venture building</div>
+        <div class="wa-item">Founding team</div>
+        <div class="wa-item">Culture builder</div>
+        <div class="wa-item">Product and market development</div>
+        <div class="wa-item">Growth and traction</div>
+        <div class="wa-item">Scaling and transition to acquisition</div>
+      </div>
+    </div></div></div>
+  </div>
+
+  <div class="acc" id="ve-perspectives">
+    <div class="acc-trig" onclick="togAcc('ve-perspectives')">
+      <span class="acc-title">Perspectives</span>
+      <div class="acc-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="1" x2="7" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="acc-body"><div class="acc-inner"><div class="acc-pad">
+      <div class="persp" style="margin-bottom:28px;">
+        <div class="persp-lbl">Perspective</div>
+        <p class="persp-txt">Venture and entrepreneurship is about turning ideas into something real. It starts with a direction, but quickly becomes a question of people, execution and the ability to move things forward despite uncertainty. Ideas on their own don't create value. What matters is whether they can be built, understood and adopted in the real world.</p>
+      </div>
+      <div class="pw">
+        <button class="pc has-tt" data-tt-title="From idea to reality" data-tt-body="The gap between a good idea and something that actually works is enormous. Most of the interesting work happens in that gap.">From idea to reality <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="People and founders" data-tt-body="The quality of the team shapes everything. Founders who can hold a vision while adapting under pressure are rare and essential.">People and founders <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Execution and scaling" data-tt-body="Strategy without execution is just an idea. Moving something from concept to traction requires relentless, often unglamorous work.">Execution and scaling <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Traction" data-tt-body="Traction is evidence that something works in the real world. It is the most honest signal a startup can produce.">Traction <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Adoption and real-world fit" data-tt-body="A venture only succeeds if what it builds is actually adopted. Real-world fit is harder and more valuable than product-market fit on paper.">Adoption and real-world fit <span class="dot">●</span></button>
+        <button class="pc has-tt" data-tt-title="Momentum" data-tt-body="Momentum compounds. The hardest part is getting the first version working well enough that the next version becomes easier to build.">Momentum <span class="dot">●</span></button>
+      </div>
+    </div></div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     CONTACT
+═══════════════════════════════════════════ -->
+<div class="page" id="p-contact">
+  <div class="sub-hero" style="padding-bottom:52px;">
+    <div class="sub-name"><span class="sni d1">Get in</span></div>
+    <div class="sub-name"><span class="sni d2">touch</span></div>
+    <div class="sub-bot">
+      <p class="sub-tag">Whether you want to talk about a project, an idea or just have a conversation, I am always open to it.</p>
+    </div>
+    <div class="sub-line" id="co-line"></div>
+  </div>
+  <div class="contact-section">
+    <div class="contact-cards rev">
+
+      <!-- ✏️ CHANGE EMAIL HERE -->
+      <a class="contact-card" href="mailto:Phillippasqualato@hotmail.com">
+        <div class="contact-card-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5l6.5 4.5L14.5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="contact-card-label">Write an email</div>
+          <div class="contact-card-value">Phillippasqualato@hotmail.com</div>
+        </div>
+        <div class="contact-card-action">Open mail app <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </a>
+
+      <!-- ✏️ CHANGE PHONE NUMBER HERE -->
+      <a class="contact-card" href="tel:+4520132830">
+        <div class="contact-card-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2.5h3l1 3-1.5 1a8 8 0 003 3l1-1.5 3 1v3A1 1 0 0112 14 10 10 0 012 4a1 1 0 011-1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="contact-card-label">Call me</div>
+          <div class="contact-card-value">+45 20 13 28 30</div>
+        </div>
+        <div class="contact-card-action">Open phone app <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ══════════════════════════════════════
+   PAGE CONFIG
+══════════════════════════════════════ */
+const PAGE_CONFIG = {
+  home:    { bg:'#0a0a0a', id:'p-home' },
+  climate: { bg:'#162d1f', id:'p-climate' },
+  health:  { bg:'#2a0e07', id:'p-health' },
+  venture: { bg:'#101828', id:'p-venture' },
+  contact: { bg:'#0a0a0a', id:'p-contact' },
+};
+let currentPage = 'home';
+let isNavigating = false;
+
+/* ══════════════════════════════════════
+   CURSOR
+══════════════════════════════════════ */
+const cur = document.getElementById('cur');
+const curR = document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function anim(){ rx+=(mx-rx)*.1; ry+=(my-ry)*.1; curR.style.left=rx+'px'; curR.style.top=ry+'px'; requestAnimationFrame(anim); })();
+const hovBound = new WeakSet();
+function bindHover(){
+  document.querySelectorAll('button,a,.acc-trig,#back-btn').forEach(el=>{
+    if(hovBound.has(el)) return;
+    hovBound.add(el);
+    el.addEventListener('mouseenter',()=>document.body.classList.add('hbig'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('hbig'));
+  });
+}
+
+/* ══════════════════════════════════════
+   TOOLTIP (JS-positioned, fixed)
+══════════════════════════════════════ */
+const ttEl    = document.getElementById('tooltip');
+const ttTitle = document.getElementById('tt-title');
+const ttBody  = document.getElementById('tt-body');
+let ttHideTimer = null;
+
+const ttBound = new WeakSet();
+function bindTooltips(){
+  document.querySelectorAll('.has-tt').forEach(btn => {
+    if(ttBound.has(btn)) return;
+    ttBound.add(btn);
+    btn.addEventListener('mouseenter', e => {
+      clearTimeout(ttHideTimer);
+      const title = btn.dataset.ttTitle;
+      const body  = btn.dataset.ttBody;
+      if(!title) return;
+      ttTitle.textContent = title;
+      ttBody.textContent  = body;
+      positionTooltip(btn);
+      ttEl.classList.add('vis');
+    });
+    btn.addEventListener('mousemove', e => {
+      positionTooltip(btn);
+    });
+    btn.addEventListener('mouseleave', () => {
+      ttHideTimer = setTimeout(() => ttEl.classList.remove('vis'), 120);
+    });
+  });
+}
+
+function positionTooltip(btn){
+  const r = btn.getBoundingClientRect();
+  const tw = 256;
+  let left = r.left + r.width/2 - tw/2;
+  left = Math.max(6, Math.min(left, window.innerWidth - tw - 10));
+  const spaceAbove = r.top;
+  const ttH = ttEl.offsetHeight || 80;
+  let top, arrowBelow;
+  if(spaceAbove > ttH + 16){
+    top = r.top - ttH - 12;
+    arrowBelow = true;
+  } else {
+    top = r.bottom + 12;
+    arrowBelow = false;
+  }
+  ttEl.style.left = left + 'px';
+  ttEl.style.top  = top + 'px';
+  const arrowLeft = (r.left + r.width/2) - left;
+  const arr = document.getElementById('tt-arr');
+  arr.style.left = Math.max(12, Math.min(arrowLeft, tw-12)) + 'px';
+  arr.style.transform = 'none';
+  if(arrowBelow){
+    arr.style.bottom='-6px'; arr.style.top='';
+    arr.style.borderTop='6px solid'; arr.style.borderBottom='none';
+  } else {
+    arr.style.top='-6px'; arr.style.bottom='';
+    arr.style.borderBottom='6px solid'; arr.style.borderTop='none';
+  }
+  // Set tooltip bg from active page --tt-bg variable
+  const pageEl = document.querySelector('.page.active');
+  const ttBg = pageEl ? getComputedStyle(pageEl).getPropertyValue('--tt-bg').trim() : '';
+  const bg = ttBg || '#161616';
+  ttEl.style.background = bg;
+  arr.style.borderColor = bg;
+}
+
+/* ══════════════════════════════════════
+   MARQUEE
+══════════════════════════════════════ */
+(function(){
+  const items=['Phillip Ankjaer Pasqualato','Building for impact','Copenhagen','Phillippasqualato@hotmail.com','Discovering through curiosity','Building through responsibility'];
+  const t=document.getElementById('mtrack');
+  // Build 8 copies for seamless loop on all screen sizes
+  for(let c=0;c<8;c++){
+    const s=document.createElement('span'); s.className='mi';
+    items.forEach(i=>{ s.innerHTML+=`<span class="mt">${i}</span><span class="md">•</span>`; });
+    t.appendChild(s);
+  }
+  // Animate half the total width for perfect loop
+  const totalW = t.scrollWidth;
+  t.style.animationDuration = Math.max(6, totalW / 140) + 's';
+})();
+
+/* ══════════════════════════════════════
+   LOADING (initial)
+══════════════════════════════════════ */
+(function(){
+  const ld=document.getElementById('loading');
+  const ps=[document.getElementById('lp0'),document.getElementById('lp1'),document.getElementById('lp2')];
+  ps.forEach((p,i)=>setTimeout(()=>p.classList.add('in'),60+i*120));
+  setTimeout(()=>{ ps[0].className='lp ol'; ps[1].className='lp om'; ps[2].className='lp or'; }, 60+2*120+1500);
+  setTimeout(()=>{ ld.classList.add('slide-out'); revealHomePage(); }, 60+2*120+1500+320);
+  setTimeout(()=>ld.classList.add('hidden'), 60+2*120+1500+820);
+})();
+
+/* ══════════════════════════════════════
+   NAVIGATE
+══════════════════════════════════════ */
+function navigate(target){
+  if(isNavigating || target===currentPage) return;
+  isNavigating=true;
+  ttEl.classList.remove('vis');
+
+  const ld=document.getElementById('loading');
+  const cfg=PAGE_CONFIG[target];
+
+  ld.classList.remove('hidden','slide-out','slide-in');
+  ['lp0','lp1','lp2'].forEach(id=>{ const el=document.getElementById(id); el.className='lp'; void el.offsetWidth; });
+  // set loading screen to current page bg before sliding in
+  ld.style.background=PAGE_CONFIG[currentPage].bg;
+  void ld.offsetWidth;
+  ld.classList.add('slide-in');
+
+  ['lp0','lp1','lp2'].forEach((id,i)=>setTimeout(()=>document.getElementById(id).classList.add('in'),80+i*100));
+
+  setTimeout(()=>{
+    // switch all backgrounds instantly while hidden behind loading screen
+    document.body.style.background=cfg.bg;
+    document.body.style.setProperty('--page-bg',cfg.bg);
+    document.documentElement.style.background=cfg.bg;
+    ld.style.background=cfg.bg;
+    // switch pages
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(cfg.id).classList.add('active');
+    window.scrollTo(0,0);
+    // reset hero parallax
+    const heroBg = document.getElementById('hero-bg');
+    if(heroBg) heroBg.style.transform = '';
+    currentPage=target;
+    updateNav(target);
+    // close all accordions on the new page
+    document.querySelectorAll('#'+cfg.id+' .acc').forEach(a=>a.classList.remove('open'));
+  },380);
+
+  setTimeout(()=>{ document.getElementById('lp0').className='lp ol'; document.getElementById('lp1').className='lp om'; document.getElementById('lp2').className='lp or'; },880);
+  setTimeout(()=>{ ld.classList.remove('slide-in'); ld.classList.add('slide-out'); revealSubPage(target); isNavigating=false; },1160);
+  setTimeout(()=>ld.classList.add('hidden'),1660);
+  // Safety: always reset isNavigating after max animation time
+  setTimeout(()=>{ isNavigating=false; },2000);
+}
+
+/* ══════════════════════════════════════
+   REVEAL
+══════════════════════════════════════ */
+function revealHomePage(){
+  const nav = document.getElementById('nav');
+  nav.classList.add('vis','nav-left');
+  nav.classList.remove('nav-right');
+  // Show footer immediately with no delay on mobile
+  const footer = document.getElementById('footer');
+  footer.classList.add('vis');
+  document.getElementById('back-btn').classList.remove('vis');
+  setTimeout(()=>document.querySelectorAll('#p-home .hni').forEach(el=>el.classList.add('in')),80);
+  setTimeout(()=>{
+    const hbot=document.querySelector('#p-home .h-bot');
+    if(hbot) hbot.classList.add('in');
+    const hm=document.getElementById('h-meta');
+    if(hm) hm.classList.add('in');
+    const hl=document.getElementById('hline');
+    if(hl) hl.classList.add('in');
+  },260);
+  document.querySelectorAll('#p-home .acc').forEach((a,i)=>setTimeout(()=>a.classList.add('in'),480+i*90));
+  initObserver();
+  bindHover();
+  bindTooltips();
+}
+
+function revealSubPage(target){
+  const page=document.getElementById(PAGE_CONFIG[target].id);
+  page.querySelectorAll('.sni').forEach(el=>{ el.classList.remove('in'); void el.offsetWidth; setTimeout(()=>el.classList.add('in'),60); });
+  const bot=page.querySelector('.sub-bot');
+  if(bot){ bot.classList.remove('in'); void bot.offsetWidth; setTimeout(()=>bot.classList.add('in'),260); }
+  const lineMap={climate:'cl-line',health:'ht-line',venture:'ve-line',contact:'co-line'};
+  const lineEl=document.getElementById(lineMap[target]);
+  if(lineEl){ lineEl.classList.remove('in'); void lineEl.offsetWidth; setTimeout(()=>lineEl.classList.add('in'),220); }
+  // stagger accordions in
+  page.querySelectorAll('.acc').forEach((a,i)=>{ a.classList.remove('in'); setTimeout(()=>a.classList.add('in'),300+i*80); });
+  // reveal utils
+  page.querySelectorAll('.rev').forEach(el=>el.classList.remove('in'));
+  setTimeout(()=>initObserver(),400);
+  bindHover();
+  bindTooltips();
+}
+
+/* ══════════════════════════════════════
+   NAV STATE
+══════════════════════════════════════ */
+function updateNav(page){
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('act'));
+  if(page==='contact') document.getElementById('contact-btn').classList.add('act');
+  const bb=document.getElementById('back-btn');
+  const hm=document.getElementById('h-meta');
+  const nav=document.getElementById('nav');
+  if(page==='home'){
+    bb.classList.remove('vis');
+    nav.classList.add('nav-left'); nav.classList.remove('nav-right');
+    if(hm){ hm.style.opacity=''; hm.style.pointerEvents=''; }
+  } else {
+    setTimeout(()=>bb.classList.add('vis'),300);
+    nav.classList.add('nav-right'); nav.classList.remove('nav-left');
+    if(hm){ hm.style.opacity='0'; hm.style.pointerEvents='none'; }
+  }
+}
+
+/* ══════════════════════════════════════
+   ACCORDION
+══════════════════════════════════════ */
+function togAcc(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('open');
+}
+
+/* ══════════════════════════════════════
+   INTERSECTION OBSERVER
+══════════════════════════════════════ */
+let observer=null;
+function initObserver(){
+  if(observer) observer.disconnect();
+  observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); observer.unobserve(e.target); } });
+  },{threshold:0.08});
+  document.querySelectorAll('.rev').forEach(el=>observer.observe(el));
+}
+
+/* ══════════════════════════════════════
+   CV MODAL
+══════════════════════════════════════ */
+document.getElementById('cv-btn').addEventListener('click',e=>{ e.preventDefault(); window.open('cv2026.pdf','_blank'); });
+function openCV(){ window.open('cv2026.pdf','_blank'); }
+function closeCV(){
+  const ov=document.getElementById('cv-ov');
+  ov.classList.remove('visible');
+  setTimeout(()=>ov.classList.remove('open'),340);
+}
+document.getElementById('cv-ov').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeCV(); });
+// Keyboard close
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeCV(); });
+
+/* portrait image - no parallax needed */
+</script>
+</body>
+</html>
